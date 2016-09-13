@@ -23,7 +23,7 @@
  */
 'use strict';
 
-angular.module('sample-03', ['adf', 'LocalStorageModule'])
+angular.module('sample-03', ['adf.core', 'LocalStorageModule'])
 .controller('sample03Ctrl', function($scope, localStorageService) {
   var name = 'sample-03';
   var model = localStorageService.get(name);

@@ -1,0 +1,32 @@
+<md-dialog aria-label="dashboard-edit">
+  <form>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Edit Dashboard</h2>
+        <span flex></span>
+        <md-button ng-click="closeDialog()">X</md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container>
+          <label ng-bind="translate('ADF_COMMON_TITLE')">Title</label>
+          <input type="text" id="dashboardTitle" ng-model="copy.title" required>
+        </md-input-container>
+        <label ng-bind="translate('ADF_EDIT_DASHBOARD_STRUCTURE_LABEL')">Structure</label>
+        <md-radio-group ng-model="model.structure" ng-change="changeStructure()">
+          <md-radio-button ng-repeat="(key, structure) in structures" ng-value="key">
+            <adf-structure-preview
+              name="key"
+              structure="structure"
+              selected="model.structure == key">
+            </adf-structure-preview>
+          </md-radio-button>
+        </md-radio-group>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <md-button type="button" class="primary" ng-click="closeDialog()" ng-bind="translate('ADF_COMMON_CLOSE')">Close</md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>
+

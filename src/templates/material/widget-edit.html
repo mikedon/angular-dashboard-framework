@@ -1,0 +1,22 @@
+<md-dialog aria-label="widget-edit">
+  <form name="widgetEditForm" novalidate role="form" ng-submit="saveDialog()">
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>{{widget.title}}</h2>
+        <span flex></span>
+        <md-button ng-click="closeDialog()">X</md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <div ng-if="widget.edit">
+          <adf-widget-content model="definition" content="widget.edit" />
+        </div>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+        <md-button type="button" ng-click="closeDialog()" ng-bind="translate('ADF_COMMON_CANCEL')">Cancel</md-button>
+        <md-button type="submit" ng-disabled="widgetEditForm.$invalid" ng-value="translate('ADF_COMMON_APPLY')">Apply</md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

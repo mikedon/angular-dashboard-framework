@@ -1,0 +1,17 @@
+<md-dialog aria-label="widget-fullscreen">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>{{definition.title}}</h2>
+      <span flex></span>
+      <md-button ng-click="closeDialog()">X</md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <adf-widget-content model="definition" content="widget" />
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions layout="row">
+    <md-button type="button" class="primary" ng-click="closeDialog()" ng-bind="translate('ADF_COMMON_CLOSE')">Close</button>
+  </md-dialog-actions>
+</md-dialog>

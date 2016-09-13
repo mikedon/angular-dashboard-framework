@@ -33,13 +33,16 @@
     <title>Dashboard</title>
 
     <!-- build:css css/sample.min.css -->
-    <!-- Bootstrap core CSS -->
-    <link href="components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+    <link href="components/angular-material/angular-material.css" rel="stylesheet">
 
     <!-- dashboard style -->
     <link href="../dist/angular-dashboard-framework.css" rel="stylesheet">
     <link href="widgets/clock/src/style.css" rel="stylesheet">
     <link href="widgets/travis/dist/adf-widget-travis.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <!-- endbuild -->
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -74,40 +77,19 @@
     </style>
   </head>
 
-  <body ng-app="sample">
-
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container" ng-controller="navigationCtrl">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" ng-click="toggleNav()">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#/sample-01">ADF</a>
-        </div>
-        <div uib-collapse="navCollapsed" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li ng-class="navClass('sample/01')">
-              <a href="#/sample/01">Sample 01</a>
-            </li>
-            <li ng-class="navClass('sample/02')">
-              <a href="#/sample/02">Sample 02</a>
-            </li>
-            <li ng-class="navClass('sample/03')">
-              <a href="#/sample/03">Sample 03</a>
-            </li>
-            <li ng-class="navClass('sample/04')">
-              <a href="#/sample/04">Sample 04</a>
-            </li>
-            <li ng-class="navClass('sample/05')">
-              <a href="#/sample/05">Sample 05</a>
-            </li>
-          </ul>
-        </div><!--/.nav-collapse -->
+  <body ng-app="sample.material">
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        ADF Material
       </div>
-    </div>
+    </md-toolbar>
+    <!--<md-nav-bar nav-bar-aria-label="nav bar">
+      <md-nav-item href="#/sample/01" name="sample1"> <a href="$/sample01"> Sample 01</a></md-nav-item>
+      <md-nav-item href="#/sample/02" name="sample2"> Sample 02</md-nav-item>
+      <md-nav-item href="#/sample/03" name="sample3"> Sample 03</md-nav-item>
+      <md-nav-item href="#/sample/04" name="sample4"> Sample 04</md-nav-item>
+      <md-nav-item href="#/sample/05" name="sample5"> Sample 05</md-nav-item>
+    </md-nav-bar>-->
 
     <div class="container">
 
@@ -117,6 +99,10 @@
 
     <!-- build:js js/angular.min.js -->
     <script type="text/javascript" src="components/angular/angular.js"></script>
+    <script type="text/javascript" src="components/angular-animate/angular-animate.js"></script>
+    <script type="text/javascript" src="components/angular-aria/angular-aria.js"></script>
+
+
     <!-- endbuild -->
 
     <!-- build:js js/angular-route.min.js -->
@@ -127,14 +113,12 @@
     <!-- Sortable -->
     <script type="text/javascript" src="components/Sortable/Sortable.js"></script>
 
-    <!-- angular-bootstrap -->
-    <script type="text/javascript" src="components/angular-bootstrap/ui-bootstrap.js"></script>
-    <script type="text/javascript" src="components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script type="text/javascript" src="components/angular-material/angular-material.js"></script>
 
     <!-- scripts -->
     <script type="text/javascript" src="../src/scripts/adf.js"></script>
     <script type="text/javascript" src="../src/scripts/adf.locale.js"></script>
-    <script type="text/javascript" src="../src/scripts/dialog-bootstrap.js"></script>
+    <script type="text/javascript" src="../src/scripts/dialog-material.js"></script>
     <script type="text/javascript" src="../src/scripts/locale-constant.js"></script>
     <script type="text/javascript" src="../src/scripts/provider.js"></script>
     <script type="text/javascript" src="../src/scripts/widget-service.js"></script>
@@ -158,7 +142,7 @@
     <script type="text/javascript" src="scripts/sample-05.js"></script>
 
     <!-- structures -->
-    <script type="text/javascript" src="structures/base/src/base.js"></script>
+    <script type="text/javascript" src="structures/base/src/base-material.js"></script>
 
     <!-- news widget -->
     <script type="text/javascript" src="widgets/news/dist/adf-widget-news.js"></script>

@@ -25,7 +25,7 @@
 'use strict';
 
 angular.module('adf')
-  .directive('adfWidget', function($injector, $q, $log, $uibModal, $rootScope, dashboard, adfTemplatePath) {
+  .directive('adfWidget', function($injector, $q, $log, dialogService, $rootScope, dashboard, adfTemplatePath) {
 
     function preLink($scope) {
       var definition = $scope.definition;
@@ -127,13 +127,12 @@ angular.module('adf')
             var opts = {
               scope: deleteScope,
               templateUrl: deleteTemplateUrl,
-              backdrop: 'static'
             };
-            var instance = $uibModal.open(opts);
-
+            dialogService.open(opts);
             deleteScope.closeDialog = function() {
-              instance.close();
-              deleteScope.$destroy();
+              dialogService.close(function() {
+                deleteScope.$destroy();
+              });
             };
             deleteScope.deleteDialog = function() {
               deleteWidget();
@@ -166,11 +165,12 @@ angular.module('adf')
             backdrop: 'static'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
 
           editScope.closeDialog = function() {
-            instance.close();
-            editScope.$destroy();
+            dialogService.close(function() {
+              editScope.$destroy();
+            });
           };
 
           // TODO create util method
@@ -286,10 +286,11 @@ angular.module('adf')
             windowClass: (definition.fullScreen) ? 'dashboard-modal widget-fullscreen' : 'dashboard-modal'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
           fullScreenScope.closeDialog = function() {
-            instance.close();
-            fullScreenScope.$destroy();
+            dialogService.close(function() {
+              fullScreenScope.$destroy();
+            });
           };
         };
       },

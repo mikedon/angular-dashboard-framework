@@ -48,7 +48,7 @@
  */
 
 angular.module('adf')
-  .directive('adfDashboard', function ($rootScope, $log, $timeout, $uibModal, dashboard, adfTemplatePath) {
+  .directive('adfDashboard', function ($rootScope, $log, $timeout, dialogService, dashboard, adfTemplatePath) {
     'use strict';
 
     function stringToBoolean(string){
@@ -126,6 +126,12 @@ angular.module('adf')
     }
 
     function changeStructure(model, structure){
+      if(!model) {
+        model = $scope.model.structure;
+      }
+      if(!structure) {
+        structure = $scope.structures[model];
+      }
       var columns = readColumns(model);
       var counter = 0;
 
@@ -389,11 +395,14 @@ angular.module('adf')
           if(model.editTemplateUrl) {
             adfEditTemplatePath = model.editTemplateUrl;
           }
-          var instance = $uibModal.open({
+
+          dialogService.open({
+            controller: function($scope) {},
             scope: editDashboardScope,
             templateUrl: adfEditTemplatePath,
             backdrop: 'static',
-            size: 'lg'
+            size: 'lg',
+            parent: angular.element(document.body)
           });
           editDashboardScope.changeStructure = function(name, structure){
             $log.info('change structure to ' + name);
@@ -403,11 +412,12 @@ angular.module('adf')
             }
           };
           editDashboardScope.closeDialog = function(){
-            // copy the new title back to the model
-            model.title = editDashboardScope.copy.title;
-            // close modal and destroy the scope
-            instance.close();
-            editDashboardScope.$destroy();
+            dialogService.close(function() {
+              // copy the new title back to the model
+              model.title = editDashboardScope.copy.title;
+              // close modal and destroy the scope
+              editDashboardScope.$destroy();
+            });
           };
         };
 
@@ -447,7 +457,7 @@ angular.module('adf')
             backdrop: 'static'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
           addScope.addWidget = function(widget){
             var w = {
               type: widget,
@@ -455,7 +465,7 @@ angular.module('adf')
             };
             addNewWidgetToModel(model, w, name);
             // close and destroy
-            instance.close();
+            dialogService.close();
             addScope.$destroy();
 
             // check for open edit mode immediately
@@ -465,8 +475,9 @@ angular.module('adf')
           };
           addScope.closeDialog = function(){
             // close and destroy
-            instance.close();
-            addScope.$destroy();
+            dialogService.close(function() {
+              addScope.$destroy();
+            });
           };
         };
 

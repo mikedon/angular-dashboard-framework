@@ -24,8 +24,14 @@
 
 'use strict';
 
-angular.module('adf', ['adf.provider', 'adf.locale', 'ui.bootstrap'])
-  .value('adfTemplatePath', '../src/templates/')
+
+angular.module('adf.core', ['adf.provider', 'adf.locale'])
   .value('rowTemplate', '<adf-dashboard-row row="row" adf-model="adfModel" options="options" edit-mode="editMode" ng-repeat="row in column.rows" />')
   .value('columnTemplate', '<adf-dashboard-column column="column" adf-model="adfModel" options="options" edit-mode="editMode" ng-repeat="column in row.columns" />')
   .value('adfVersion', '<<adfVersion>>');
+
+angular.module('adf', ['adf.core', 'ui.bootstrap', 'adf.dialog.bootstrap'])
+  .value('adfTemplatePath', '../src/templates/');
+
+angular.module('adf.material', ['adf.core', 'ngMaterial', 'adf.dialog.ngMaterial'])
+  .value('adfTemplatePath', '../src/templates/material/');

@@ -1,0 +1,43 @@
+<md-dialog aria-label="widget-add">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Add new widget</h2>
+      <span flex></span>
+      <md-button ng-click="closeDialog()">X</md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <div ng-if="createCategories">
+        <md-list flex ng-init="categorized = createCategories(widget)">
+          <md-subheader class="md-no-sticky" ng-repeat="category in categorized | adfOrderByObjectKey: 'name'">{{category.name}}</md-subheader>
+          <md-list-item ng-repeat="widget in category.widgets | adfOrderByObjectKey: 'key'">
+            <div class="md-list-item-text">
+              <h3>{{widget.title}}</h3>
+              <p>{{widget.description}}</p>
+            </div>
+            <md-button ng-click="addWidget(widget.key)">
+              <i class="material-icons">node_add</i>
+            </md-button>
+          </md-list-item>
+        </md-list>
+      </div>
+      <div ng-if="!createCategories">
+        <md-list flex>
+          <md-list-item ng-repeat="widget in widgets | adfOrderByObjectKey: 'key'">
+            <div class="md-list-item-text">
+              <h3>{{widget.title}}</h3>
+              <p>{{widget.description}}</p>
+            </div>
+            <md-button ng-click="addWidget(widget.key)">
+              <i class="material-icons">node_add</i>
+            </md-button>
+          </md-list-item>
+        </md-list>
+      </div>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions layout="row">
+    <md-button type="button" class="primary" ng-click="closeDialog()" ng-bind="translate('ADF_COMMON_CLOSE')">Close</md-button>
+  </md-dialog-actions>
+</md-dialog>
