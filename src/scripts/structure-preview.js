@@ -25,7 +25,7 @@
 'use strict';
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfStructurePreview', function(adfTemplatePath) {
 
     function adjustRowHeight(container){

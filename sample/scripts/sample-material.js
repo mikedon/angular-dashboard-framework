@@ -23,42 +23,21 @@
  */
 'use strict';
 
-angular.module('sample', [
-  'adf', 'adf.structures.base', 'adf.widget.news',
-  'adf.widget.randommsg', 'adf.widget.weather',
-  'adf.widget.markdown', 'adf.widget.linklist',
-  'adf.widget.github', 'adf.widget.version',
-  'adf.widget.clock', 'adf.widget.travis',
-  'LocalStorageModule',
-  'sample-01', 'sample-02', 'sample-03',
-  'sample-04', 'sample-05', 'ngRoute'
+angular.module('sample.material', [
+  'adf.material', 'adf.structures.base-material',
+  'adf.widget.markdown', 'LocalStorageModule',
+  'sample-06', 'ngRoute'
 ])
 .config(function(dashboardProvider, $routeProvider, localStorageServiceProvider){
   dashboardProvider.widgetsPath('widgets/');
-  localStorageServiceProvider.setPrefix('adf');
+  localStorageServiceProvider.setPrefix('adf-material');
 
-  $routeProvider.when('/sample/01', {
+  $routeProvider.when('/sample/06', {
     templateUrl: 'partials/sample.html',
-    controller: 'sample01Ctrl'
-  })
-  .when('/sample/02', {
-    templateUrl: 'partials/sample.html',
-    controller: 'sample02Ctrl'
-  })
-  .when('/sample/03', {
-    templateUrl: 'partials/sampleWithFilter.html',
-    controller: 'sample03Ctrl'
-  })
-  .when('/sample/04', {
-    templateUrl: 'partials/sample.html',
-    controller: 'sample04Ctrl'
-  })
-  .when('/sample/05', {
-    templateUrl: 'partials/sample5.html',
-    controller: 'sample05Ctrl'
+    controller: 'sample06Ctrl'
   })
   .otherwise({
-    redirectTo: '/sample/01'
+    redirectTo: '/sample/06'
   });
 
 })

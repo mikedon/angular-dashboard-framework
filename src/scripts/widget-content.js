@@ -24,7 +24,7 @@
 
 'use strict';
 
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfWidgetContent', function($log, $q, widgetService,
           $compile, $controller, $injector, dashboard) {
 

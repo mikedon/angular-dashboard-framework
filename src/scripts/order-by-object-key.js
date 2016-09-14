@@ -24,7 +24,7 @@
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .filter('adfOrderByObjectKey', function($filter) {
     'use strict';
 

@@ -27,7 +27,7 @@
 /**
  * The widget service provide helper functions to render widgets and their content.
  */
-angular.module('adf')
+angular.module('adf.core')
   .factory('widgetService', function($http, $q, $sce, $templateCache, dashboard) {
     'use strict';
 

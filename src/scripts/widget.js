@@ -24,7 +24,7 @@
 
 'use strict';
 
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfWidget', function($injector, $q, $log, dialogService, $rootScope, dashboard, adfTemplatePath) {
 
     function preLink($scope) {

@@ -47,7 +47,7 @@
  * @param {boolean=} categories enable categories for the add widget dialog.
  */
 
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfDashboard', function ($rootScope, $log, $timeout, dialogService, dashboard, adfTemplatePath) {
     'use strict';
 

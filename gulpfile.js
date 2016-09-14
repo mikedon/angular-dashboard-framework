@@ -194,6 +194,24 @@ gulp.task('sample', ['widget-templates', 'sample-templates', 'dashboard-template
       .pipe(gulp.dest('dist/sample'));
 });
 
+gulp.task('sample-material', ['widget-templates', 'sample-templates', 'dashboard-templates', 'copy-font'], function(){
+  var templates = gulp.src('.tmp/*.js', {read: false});
+  var assets = $.useref.assets();
+  gulp.src('sample/index-material.html')
+      // inject templates
+      .pipe($.inject(templates, {relative: true}))
+      .pipe(assets)
+      .pipe($.if('*.js', $.replace('<<adfVersion>>', pkg.version)))
+      .pipe($.if('*.js', $.ngAnnotate(annotateOptions)))
+      .pipe($.if('*.js', $.uglify()))
+      .pipe($.if('*.css', $.minifyCss()))
+      .pipe($.rev())
+      .pipe(assets.restore())
+      .pipe($.useref())
+      .pipe($.revReplace())
+      .pipe(gulp.dest('dist/sample'));
+});
+
 /** livereload **/
 
 gulp.task('reload', function(){
@@ -313,6 +331,6 @@ gulp.task('e2e', ['e2e-server', 'webdriver_update'], function(cb) {
 gulp.task('travis', ['jslint', 'test', 'coverall', 'build']);
 
 /** shorthand methods **/
-gulp.task('all', ['build', 'docs', 'sample']);
+gulp.task('all', ['build', 'docs', 'sample', 'sample-material']);
 
 gulp.task('default', ['jslint', 'test', 'build']);

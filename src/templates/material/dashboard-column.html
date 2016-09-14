@@ -1,4 +1,5 @@
-<div adf-id="{{column.cid}}" class="column" ng-class="column.styleClass" ng-model="column.widgets">
+<div adf-id="{{column.cid}}" class="column" ng-class="column.styleClass"
+    ng-model="column.widgets" flex="{{column.flex}}">
     <adf-widget ng-repeat="definition in column.widgets"
                 definition="definition"
                 column="column"

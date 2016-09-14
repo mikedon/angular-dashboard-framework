@@ -24,7 +24,7 @@
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfDashboardRow', function ($compile, adfTemplatePath, columnTemplate) {
     'use strict';
 
