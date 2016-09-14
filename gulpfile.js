@@ -116,11 +116,12 @@ gulp.task('js', function(){
 });
 
 gulp.task('js-with-tpls', function(){
-  var sources = gulp.src(['src/scripts/*.js', 'src/templates/*.html'])
+  var sources = gulp.src(['src/scripts/*.js', 'src/templates/**/*.html'])
     .pipe($.if('*.html', $.minifyHtml(minifyHtmlOptions)))
     .pipe($.if('*.html', $.angularTemplatecache(name + '.tpl.js', templateOptions)))
   processScripts(sources, name + '-tpls');
 });
+
 
 gulp.task('build', ['styles', 'js', 'js-with-tpls']);
 

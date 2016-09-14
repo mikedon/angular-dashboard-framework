@@ -25,12 +25,17 @@
 
 
 
-angular.module('adf', ['adf.provider', 'adf.locale', 'ui.bootstrap'])
-  .value('adfTemplatePath', '../src/templates/')
+
+angular.module('adf.core', ['adf.provider', 'adf.locale'])
   .value('rowTemplate', '<adf-dashboard-row row="row" adf-model="adfModel" options="options" edit-mode="editMode" ng-repeat="row in column.rows" />')
   .value('columnTemplate', '<adf-dashboard-column column="column" adf-model="adfModel" options="options" edit-mode="editMode" ng-repeat="column in row.columns" />')
-  .value('adfVersion', '0.12.0');
+  .value('adfVersion', '0.13.0-SNAPSHOT');
 
+angular.module('adf', ['adf.core', 'ui.bootstrap', 'adf.dialog.bootstrap'])
+  .value('adfTemplatePath', '../src/templates/');
+
+angular.module('adf.material', ['adf.core', 'ngMaterial', 'adf.dialog.ngMaterial'])
+  .value('adfTemplatePath', '../src/templates/material/');
 /*
  * The MIT License
  *
@@ -85,7 +90,7 @@ angular.module('adf.locale', [])
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfDashboardColumn', ["$log", "$compile", "$rootScope", "adfTemplatePath", "rowTemplate", "dashboard", function ($log, $compile, $rootScope, adfTemplatePath, rowTemplate, dashboard) {
     
 
@@ -301,8 +306,8 @@ angular.module('adf')
  * @param {boolean=} categories enable categories for the add widget dialog.
  */
 
-angular.module('adf')
-  .directive('adfDashboard', ["$rootScope", "$log", "$timeout", "$uibModal", "dashboard", "adfTemplatePath", function ($rootScope, $log, $timeout, $uibModal, dashboard, adfTemplatePath) {
+angular.module('adf.core')
+  .directive('adfDashboard', ["$rootScope", "$log", "$timeout", "dialogService", "dashboard", "adfTemplatePath", function ($rootScope, $log, $timeout, dialogService, dashboard, adfTemplatePath) {
     
 
     function stringToBoolean(string){
@@ -380,6 +385,12 @@ angular.module('adf')
     }
 
     function changeStructure(model, structure){
+      if(!model) {
+        model = $scope.model.structure;
+      }
+      if(!structure) {
+        structure = $scope.structures[model];
+      }
       var columns = readColumns(model);
       var counter = 0;
 
@@ -507,17 +518,17 @@ angular.module('adf')
      */
     function createCategories(widgets){
       var categories = {};
-      angular.forEach(widgets, function(widget){
+      angular.forEach(widgets, function(widget, key){
         var category = widget.category;
         // if the widget has no category use a default one
         if (!category){
           category = 'Miscellaneous';
         }
         // push widget to category array
-        if (!categories[category]){
-          categories[category] = [];
+        if (angular.isUndefined(categories[category])){
+          categories[category] = {widgets: {}};
         }
-        categories[category].push(widget);
+        categories[category].widgets[key] = widget;
       });
       return categories;
     }
@@ -643,11 +654,14 @@ angular.module('adf')
           if(model.editTemplateUrl) {
             adfEditTemplatePath = model.editTemplateUrl;
           }
-          var instance = $uibModal.open({
+
+          dialogService.open({
+            controller: function($scope) {},
             scope: editDashboardScope,
             templateUrl: adfEditTemplatePath,
             backdrop: 'static',
-            size: 'lg'
+            size: 'lg',
+            parent: angular.element(document.body)
           });
           editDashboardScope.changeStructure = function(name, structure){
             $log.info('change structure to ' + name);
@@ -657,11 +671,12 @@ angular.module('adf')
             }
           };
           editDashboardScope.closeDialog = function(){
-            // copy the new title back to the model
-            model.title = editDashboardScope.copy.title;
-            // close modal and destroy the scope
-            instance.close();
-            editDashboardScope.$destroy();
+            dialogService.close(function() {
+              // copy the new title back to the model
+              model.title = editDashboardScope.copy.title;
+              // close modal and destroy the scope
+              editDashboardScope.$destroy();
+            });
           };
         };
 
@@ -701,7 +716,7 @@ angular.module('adf')
             backdrop: 'static'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
           addScope.addWidget = function(widget){
             var w = {
               type: widget,
@@ -709,7 +724,7 @@ angular.module('adf')
             };
             addNewWidgetToModel(model, w, name);
             // close and destroy
-            instance.close();
+            dialogService.close();
             addScope.$destroy();
 
             // check for open edit mode immediately
@@ -719,8 +734,9 @@ angular.module('adf')
           };
           addScope.closeDialog = function(){
             // close and destroy
-            instance.close();
-            addScope.$destroy();
+            dialogService.close(function() {
+              addScope.$destroy();
+            });
           };
         };
 
@@ -745,6 +761,33 @@ angular.module('adf')
     };
   }]);
 
+angular.module('adf.dialog.bootstrap', ['ui.bootstrap'])
+  .factory('dialogService', ["$uibModal", function($uibModal) {
+    
+    var dialog = {};
+    var instance;
+    dialog.open = function(options) {
+      instance = $uibModal.open(options);
+    };
+    dialog.close = function(fn) {
+      fn();
+      instance.close();
+    }
+    return dialog;
+}]);
+angular.module('adf.dialog.ngMaterial', ['ngMaterial'])
+  .factory('dialogService', ["$mdDialog", function($mdDialog) {
+    
+    var dialog = {};
+    dialog.open = function(options) {
+      $mdDialog.show(options);
+    };
+    dialog.close = function(fn) {
+      fn();
+      $mdDialog.hide();
+    }
+    return dialog;
+}]);
 /*
 * The MIT License
 *
@@ -857,7 +900,7 @@ angular.module('adf.locale')
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .filter('adfOrderByObjectKey', ["$filter", function($filter) {
     
 
@@ -1256,7 +1299,7 @@ angular.module('adf.provider', ['adf.locale'])
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfDashboardRow', ["$compile", "adfTemplatePath", "columnTemplate", function ($compile, adfTemplatePath, columnTemplate) {
     
 
@@ -1308,7 +1351,7 @@ angular.module('adf')
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfStructurePreview', ["adfTemplatePath", function(adfTemplatePath) {
 
     function adjustRowHeight(container){
@@ -1373,7 +1416,7 @@ angular.module('adf')
 
 
 
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfWidgetContent', ["$log", "$q", "widgetService", "$compile", "$controller", "$injector", "dashboard", function($log, $q, widgetService,
           $compile, $controller, $injector, dashboard) {
 
@@ -1519,7 +1562,7 @@ angular.module('adf')
 /**
  * The widget service provide helper functions to render widgets and their content.
  */
-angular.module('adf')
+angular.module('adf.core')
   .factory('widgetService', ["$http", "$q", "$sce", "$templateCache", "dashboard", function($http, $q, $sce, $templateCache, dashboard) {
     
 
@@ -1593,8 +1636,8 @@ angular.module('adf')
 
 
 
-angular.module('adf')
-  .directive('adfWidget', ["$injector", "$q", "$log", "$uibModal", "$rootScope", "dashboard", "adfTemplatePath", function($injector, $q, $log, $uibModal, $rootScope, dashboard, adfTemplatePath) {
+angular.module('adf.core')
+  .directive('adfWidget', ["$injector", "$q", "$log", "dialogService", "$rootScope", "dashboard", "adfTemplatePath", function($injector, $q, $log, dialogService, $rootScope, dashboard, adfTemplatePath) {
 
     function preLink($scope) {
       var definition = $scope.definition;
@@ -1696,13 +1739,12 @@ angular.module('adf')
             var opts = {
               scope: deleteScope,
               templateUrl: deleteTemplateUrl,
-              backdrop: 'static'
             };
-            var instance = $uibModal.open(opts);
-
+            dialogService.open(opts);
             deleteScope.closeDialog = function() {
-              instance.close();
-              deleteScope.$destroy();
+              dialogService.close(function() {
+                deleteScope.$destroy();
+              });
             };
             deleteScope.deleteDialog = function() {
               deleteWidget();
@@ -1735,11 +1777,12 @@ angular.module('adf')
             backdrop: 'static'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
 
           editScope.closeDialog = function() {
-            instance.close();
-            editScope.$destroy();
+            dialogService.close(function() {
+              editScope.$destroy();
+            });
           };
 
           // TODO create util method
@@ -1855,10 +1898,11 @@ angular.module('adf')
             windowClass: (definition.fullScreen) ? 'dashboard-modal widget-fullscreen' : 'dashboard-modal'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
           fullScreenScope.closeDialog = function() {
-            instance.close();
-            fullScreenScope.$destroy();
+            dialogService.close(function() {
+              fullScreenScope.$destroy();
+            });
           };
         };
       }],
@@ -1883,10 +1927,22 @@ $templateCache.put("../src/templates/dashboard-row.html","<div class=row ng-clas
 $templateCache.put("../src/templates/dashboard-title.html","<h1> {{model.title}} <span style=\"font-size: 16px\" class=pull-right> <a href ng-if=editMode title=\"{{ translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_ADD\') }}\" ng-click=addWidgetDialog()> <i class=\"glyphicon glyphicon-plus-sign\"></i> </a> <a href ng-if=editMode title=\"{{ translate(\'ADF_COMMON_EDIT_DASHBOARD\') }}\" ng-click=editDashboardDialog()> <i class=\"glyphicon glyphicon-cog\"></i> </a> <a href ng-if=options.editable title=\"{{editMode ? translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_SAVE\') : translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_EDIT_MODE\') }}\" ng-click=toggleEditMode()> <i class=glyphicon x-ng-class=\"{\'glyphicon-edit\' : !editMode, \'glyphicon-save\' : editMode}\"></i> </a> <a href ng-if=editMode title=\"{{ translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_UNDO\') }}\" ng-click=cancelEditMode()> <i class=\"glyphicon glyphicon-repeat adf-flip\"></i> </a> </span> </h1> ");
 $templateCache.put("../src/templates/dashboard.html","<div class=dashboard-container> <div ng-include src=model.titleTemplateUrl></div> <div class=dashboard x-ng-class=\"{\'edit\' : editMode}\"> <adf-dashboard-row row=row adf-model=model options=options ng-repeat=\"row in model.rows\" edit-mode=editMode continuous-edit-mode=continuousEditMode> </adf-dashboard-row></div> </div> ");
 $templateCache.put("../src/templates/structure-preview.html","<div class=structure-preview ng-class=\"{selected: selected}\"> <h4>{{name}}</h4> <adf-dashboard-row ng-repeat=\"row in preview.rows\" row=row> </adf-dashboard-row></div> ");
-$templateCache.put("../src/templates/widget-add.html","<div class=modal-header> <button type=button class=close ng-click=closeDialog() aria-hidden=true>&times;</button> <h4 class=modal-title ng-bind=\"translate(\'ADF_WIDGET_ADD_HEADER\')\">Add new widget</h4> </div> <div class=modal-body>  <div ng-if=createCategories> <uib-accordion ng-init=\"categorized = createCategories(widgets)\"> <uib-accordion-group heading={{category.name}} ng-repeat=\"category in categorized | adfOrderByObjectKey: \'name\'\"> <dl class=dl-horizontal> <dt ng-repeat-start=\"widget in category | adfOrderByObjectKey: \'key\'\"> <a href ng-click=addWidget(key)> {{widget.title}} </a> </dt> <dd ng-repeat-end ng-if=widget.description> {{widget.description}} </dd> </dl> </uib-accordion-group> </uib-accordion> </div>  <div style=\"display: inline-block;\" ng-if=!createCategories> <dl class=dl-horizontal> <dt ng-repeat-start=\"widget in widgets | adfOrderByObjectKey: \'key\'\"> <a href ng-click=addWidget(widget.key)> {{widget.title}} </a> </dt> <dd ng-repeat-end ng-if=widget.description> {{widget.description}} </dd> </dl> </div> </div> <div class=modal-footer> <button type=button class=\"btn btn-primary\" ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</button> </div> ");
+$templateCache.put("../src/templates/widget-add.html","<div class=modal-header> <button type=button class=close ng-click=closeDialog() aria-hidden=true>&times;</button> <h4 class=modal-title ng-bind=\"translate(\'ADF_WIDGET_ADD_HEADER\')\">Add new widget</h4> </div> <div class=modal-body>  <div ng-if=createCategories> <uib-accordion ng-init=\"categorized = createCategories(widgets)\"> <uib-accordion-group heading={{category.name}} ng-repeat=\"category in categorized | adfOrderByObjectKey: \'name\'\"> <dl class=dl-horizontal> <dt ng-repeat-start=\"widget in category.widgets | adfOrderByObjectKey: \'key\'\"> <a href ng-click=addWidget(widget.key)> {{widget.title}} </a> </dt> <dd ng-repeat-end ng-if=widget.description> {{widget.description}} </dd> </dl> </uib-accordion-group> </uib-accordion> </div>  <div style=\"display: inline-block;\" ng-if=!createCategories> <dl class=dl-horizontal> <dt ng-repeat-start=\"widget in widgets | adfOrderByObjectKey: \'key\'\"> <a href ng-click=addWidget(widget.key)> {{widget.title}} </a> </dt> <dd ng-repeat-end ng-if=widget.description> {{widget.description}} </dd> </dl> </div> </div> <div class=modal-footer> <button type=button class=\"btn btn-primary\" ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</button> </div> ");
 $templateCache.put("../src/templates/widget-delete.html","<div class=modal-header> <h4 class=modal-title><span ng-bind=\"translate(\'ADF_COMMON_DELETE\')\">Delete</span> {{widget.title}}</h4> </div> <div class=modal-body> <form role=form> <div class=form-group> <label for=widgetTitle ng-bind=\"translate(\'ADF_WIDGET_DELETE_CONFIRM_MESSAGE\')\">Are you sure you want to delete this widget ?</label> </div> </form> </div> <div class=modal-footer> <button type=button class=\"btn btn-default\" ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</button> <button type=button class=\"btn btn-primary\" ng-click=deleteDialog() ng-bind=\"translate(\'ADF_COMMON_DELETE\')\">Delete</button> </div> ");
 $templateCache.put("../src/templates/widget-edit.html","<form name=widgetEditForm novalidate role=form ng-submit=saveDialog()> <div class=modal-header> <button type=button class=close ng-click=closeDialog() aria-hidden=true>&times;</button> <h4 class=modal-title>{{widget.title}}</h4> </div> <div class=modal-body> <div class=\"alert alert-danger\" role=alert ng-show=validationError> <strong>Apply error:</strong> {{validationError}} </div> <div class=form-group> <label for=widgetTitle ng-bind=\"translate(\'ADF_COMMON_TITLE\')\">Title</label> <input type=text class=form-control id=widgetTitle ng-model=definition.title placeholder=\"Enter title\" required> </div> <div ng-if=widget.edit> <adf-widget-content model=definition content=widget.edit> </adf-widget-content></div> </div> <div class=modal-footer> <button type=button class=\"btn btn-default\" ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CANCEL\')\">Cancel</button> <input type=submit class=\"btn btn-primary\" ng-disabled=widgetEditForm.$invalid ng-value=\"translate(\'ADF_COMMON_APPLY\')\"> </div> </form> ");
 $templateCache.put("../src/templates/widget-fullscreen.html","<div class=modal-header> <div class=\"pull-right widget-icons\"> <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_REFRESH\') }}\" ng-if=widget.reload ng-click=reload()> <i class=\"glyphicon glyphicon-refresh\"></i> </a> <a href title=close ng-click=closeDialog()> <i class=\"glyphicon glyphicon-remove\"></i> </a> </div> <h4 class=modal-title>{{definition.title}}</h4> </div> <div class=modal-body> <adf-widget-content model=definition content=widget> </adf-widget-content></div> <div class=modal-footer> <button type=button class=\"btn btn-primary\" ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</button> </div> ");
 $templateCache.put("../src/templates/widget-title.html","<h3 class=panel-title> {{definition.title}} <span class=pull-right> <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_REFRESH\') }}\" ng-if=widget.reload ng-click=reload()> <i class=\"glyphicon glyphicon-refresh\"></i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_MOVE\') }}\" class=adf-move ng-if=editMode> <i class=\"glyphicon glyphicon-move\"></i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_COLLAPSE\') }}\" ng-show=\"options.collapsible && !widgetState.isCollapsed\" ng-click=\"widgetState.isCollapsed = !widgetState.isCollapsed\"> <i class=\"glyphicon glyphicon-minus\"></i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_EXPAND\') }}\" ng-show=\"options.collapsible && widgetState.isCollapsed\" ng-click=\"widgetState.isCollapsed = !widgetState.isCollapsed\"> <i class=\"glyphicon glyphicon-plus\"></i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_EDIT\') }}\" ng-click=edit() ng-if=editMode> <i class=\"glyphicon glyphicon-cog\"></i> </a> <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_FULLSCREEN\') }}\" ng-click=openFullScreen() ng-show=options.maximizable> <i class=\"glyphicon glyphicon-fullscreen\"></i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_REMOVE\') }}\" ng-click=remove() ng-if=editMode> <i class=\"glyphicon glyphicon-remove\"></i> </a> </span> </h3> ");
-$templateCache.put("../src/templates/widget.html","<div adf-id={{definition.wid}} adf-widget-type={{definition.type}} ng-class=\"widgetClasses(widget, definition)\" class=widget> <div class=\"panel-heading clearfix\" ng-if=\"!widget.frameless || editMode\"> <div ng-include src=definition.titleTemplateUrl></div> </div> <div ng-class=\"{\'panel-body\':!widget.frameless || editMode}\" uib-collapse=widgetState.isCollapsed> <adf-widget-content model=definition content=widget> </adf-widget-content></div> </div> ");}]);
+$templateCache.put("../src/templates/widget.html","<div adf-id={{definition.wid}} adf-widget-type={{definition.type}} ng-class=\"widgetClasses(widget, definition)\" class=widget> <div class=\"panel-heading clearfix\" ng-if=\"!widget.frameless || editMode\"> <div ng-include src=definition.titleTemplateUrl></div> </div> <div ng-class=\"{\'panel-body\':!widget.frameless || editMode}\" uib-collapse=widgetState.isCollapsed> <adf-widget-content model=definition content=widget> </adf-widget-content></div> </div> ");
+$templateCache.put("../src/templates/material/dashboard-column.html","<div adf-id={{column.cid}} class=column ng-class=column.styleClass ng-model=column.widgets flex={{column.flex}}> <adf-widget ng-repeat=\"definition in column.widgets\" definition=definition column=column edit-mode=editMode options=options widget-state=widgetState>  </adf-widget></div> ");
+$templateCache.put("../src/templates/material/dashboard-edit.html","<md-dialog aria-label=dashboard-edit> <form> <md-toolbar> <div class=md-toolbar-tools> <h2>Edit Dashboard</h2> <span flex></span> <md-button ng-click=closeDialog()>X</md-button> </div> </md-toolbar> <md-dialog-content> <div class=md-dialog-content> <md-input-container> <label ng-bind=\"translate(\'ADF_COMMON_TITLE\')\">Title</label> <input type=text id=dashboardTitle ng-model=copy.title required> </md-input-container> <label ng-bind=\"translate(\'ADF_EDIT_DASHBOARD_STRUCTURE_LABEL\')\">Structure</label> <md-radio-group ng-model=model.structure ng-change=changeStructure()> <md-radio-button ng-repeat=\"(key, structure) in structures\" ng-value=key> <adf-structure-preview name=key structure=structure selected=\"model.structure == key\"> </adf-structure-preview> </md-radio-button> </md-radio-group> </div></md-dialog-content> <md-dialog-actions layout=row> <md-button type=button class=primary ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</md-button> </md-dialog-actions> </form> </md-dialog> ");
+$templateCache.put("../src/templates/material/dashboard-row.html","<div class=row layout=row flex ng-class=row.styleClass ng-style=row.style>  </div> ");
+$templateCache.put("../src/templates/material/dashboard-title.html","<h1 layout=row flex> <span flex>{{model.title}}</span> <span flex></span> <span style=\"font-size: 16px\"> <a href ng-if=editMode title=\"{{ translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_ADD\') }}\" ng-click=addWidgetDialog()> <i class=material-icons>note_add</i> </a> <a href ng-if=editMode title=\"{{ translate(\'ADF_COMMON_EDIT_DASHBOARD\') }}\" ng-click=editDashboardDialog()> <i class=material-icons>settings</i> </a> <a href ng-if=options.editable title=\"{{editMode ? translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_SAVE\') : translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_EDIT_MODE\') }}\" ng-click=toggleEditMode()> <i ng-show=!editMode class=material-icons>mode_edit</i> <i ng-show=editMode class=material-icons>save</i> </a> <a href ng-if=editMode title=\"{{ translate(\'ADF_DASHBOARD_TITLE_TOOLTIP_UNDO\') }}\" ng-click=cancelEditMode()> <i class=material-icons>undo</i> </a> </span> </h1> ");
+$templateCache.put("../src/templates/material/dashboard.html","<div class=dashboard-container> <div ng-include src=model.titleTemplateUrl></div> <div class=dashboard x-ng-class=\"{\'edit\' : editMode}\"> <adf-dashboard-row row=row adf-model=model options=options ng-repeat=\"row in model.rows\" edit-mode=editMode continuous-edit-mode=continuousEditMode> </adf-dashboard-row></div> </div> ");
+$templateCache.put("../src/templates/material/structure-preview.html","<div class=structure-preview ng-class=\"{selected: selected}\"> <h4>{{name}}</h4> <adf-dashboard-row ng-repeat=\"row in preview.rows\" row=row> </adf-dashboard-row></div> ");
+$templateCache.put("../src/templates/material/widget-add.html","<md-dialog aria-label=widget-add> <md-toolbar> <div class=md-toolbar-tools> <h2>Add new widget</h2> <span flex></span> <md-button ng-click=closeDialog()>X</md-button> </div> </md-toolbar> <md-dialog-content> <div class=md-dialog-content> <div ng-if=createCategories> <md-list flex ng-init=\"categorized = createCategories(widget)\"> <md-subheader class=md-no-sticky ng-repeat=\"category in categorized | adfOrderByObjectKey: \'name\'\">{{category.name}}</md-subheader> <md-list-item ng-repeat=\"widget in category.widgets | adfOrderByObjectKey: \'key\'\"> <div class=md-list-item-text> <h3>{{widget.title}}</h3> <p>{{widget.description}}</p> </div> <md-button ng-click=addWidget(widget.key)> <i class=material-icons>node_add</i> </md-button> </md-list-item> </md-list> </div> <div ng-if=!createCategories> <md-list flex> <md-list-item ng-repeat=\"widget in widgets | adfOrderByObjectKey: \'key\'\"> <div class=md-list-item-text> <h3>{{widget.title}}</h3> <p>{{widget.description}}</p> </div> <md-button ng-click=addWidget(widget.key)> <i class=material-icons>node_add</i> </md-button> </md-list-item> </md-list> </div> </div> </md-dialog-content> <md-dialog-actions layout=row> <md-button type=button class=primary ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</md-button> </md-dialog-actions> </md-dialog>");
+$templateCache.put("../src/templates/material/widget-delete.html","<md-dialog aria-label=widget-delete> <md-toolbar> <div class=md-toolbar-tools> <h2><span ng-bind=\"translate(\'ADF_COMMON_DELETE\')\">Delete</span> {{widget.title}}</h2> </div> </md-toolbar> <md-dialog-content> <div class=md-dialog-content> <form role=form> <div class=form-group> <label for=widgetTitle ng-bind=\"translate(\'ADF_WIDGET_DELETE_CONFIRM_MESSAGE\')\">Are you sure you want to delete this widget ?</label> </div> </form> </div> </md-dialog-content> <md-dialog-actions layout=row> <md-button type=button ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close</md-button> <md-button type=button class=primary ng-click=deleteDialog() ng-bind=\"translate(\'ADF_COMMON_DELETE\')\">Delete</md-button> </md-dialog-actions> </md-dialog>");
+$templateCache.put("../src/templates/material/widget-edit.html","<md-dialog aria-label=widget-edit> <form name=widgetEditForm novalidate role=form ng-submit=saveDialog()> <md-toolbar> <div class=md-toolbar-tools> <h2>{{widget.title}}</h2> <span flex></span> <md-button ng-click=closeDialog()>X</md-button> </div> </md-toolbar> <md-dialog-content> <div class=md-dialog-content> <div ng-if=widget.edit> <adf-widget-content model=definition content=widget.edit> </adf-widget-content></div> </div> </md-dialog-content> <md-dialog-actions layout=row> <md-button type=button ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CANCEL\')\">Cancel</md-button> <md-button type=submit ng-disabled=widgetEditForm.$invalid ng-value=\"translate(\'ADF_COMMON_APPLY\')\">Apply</md-button> </md-dialog-actions> </form> </md-dialog>");
+$templateCache.put("../src/templates/material/widget-fullscreen.html","<md-dialog aria-label=widget-fullscreen> <md-toolbar> <div class=md-toolbar-tools> <h2>{{definition.title}}</h2> <span flex></span> <md-button ng-click=closeDialog()>X</md-button> </div> </md-toolbar> <md-dialog-content> <div class=md-dialog-content> <adf-widget-content model=definition content=widget> </adf-widget-content></div> </md-dialog-content> <md-dialog-actions layout=row> <md-button type=button class=primary ng-click=closeDialog() ng-bind=\"translate(\'ADF_COMMON_CLOSE\')\">Close </md-button></md-dialog-actions> </md-dialog>");
+$templateCache.put("../src/templates/material/widget-title.html","<h3 layout=row flex> <span flex>{{definition.title}}</span> <span flex></span> <span> <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_REFRESH\') }}\" ng-if=widget.reload ng-click=reload()> <i class=material-icons>refresh</i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_MOVE\') }}\" class=adf-move ng-if=editMode> <i class=material-icons>open_with</i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_COLLAPSE\') }}\" ng-show=\"options.collapsible && !widgetState.isCollapsed\" ng-click=\"widgetState.isCollapsed = !widgetState.isCollapsed\"> <i class=material-icons>get_app</i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_EXPAND\') }}\" ng-show=\"options.collapsible && widgetState.isCollapsed\" ng-click=\"widgetState.isCollapsed = !widgetState.isCollapsed\"> <i class=material-icons>open_in_browser</i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_EDIT\') }}\" ng-click=edit() ng-if=editMode> <i class=material-icons>mode_edit</i> </a> <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_FULLSCREEN\') }}\" ng-click=openFullScreen() ng-show=options.maximizable> <i class=material-icons>all_out</i> </a>  <a href title=\"{{ translate(\'ADF_WIDGET_TOOLTIP_REMOVE\') }}\" ng-click=remove() ng-if=editMode> <i class=material-icons>delete</i> </a> </span> </h3> ");
+$templateCache.put("../src/templates/material/widget.html","<md-card adf-id={{definition.wid}} adf-widget-type={{definition.type}} ng-class=\"widgetClasses(widget, definition)\" class=widget> <md-card-title> <md-card-title-text ng-if=\"!widget.frameless || editMode\"> <div ng-include src=definition.titleTemplateUrl></div> </md-card-title-text> </md-card-title> <md-card-content> <adf-widget-content model=definition content=widget> </adf-widget-content></md-card-content> </md-card> ");}]);
 })(window);

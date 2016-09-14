@@ -25,12 +25,17 @@
 
 
 
-angular.module('adf', ['adf.provider', 'adf.locale', 'ui.bootstrap'])
-  .value('adfTemplatePath', '../src/templates/')
+
+angular.module('adf.core', ['adf.provider', 'adf.locale'])
   .value('rowTemplate', '<adf-dashboard-row row="row" adf-model="adfModel" options="options" edit-mode="editMode" ng-repeat="row in column.rows" />')
   .value('columnTemplate', '<adf-dashboard-column column="column" adf-model="adfModel" options="options" edit-mode="editMode" ng-repeat="column in row.columns" />')
-  .value('adfVersion', '0.12.0');
+  .value('adfVersion', '0.13.0-SNAPSHOT');
 
+angular.module('adf', ['adf.core', 'ui.bootstrap', 'adf.dialog.bootstrap'])
+  .value('adfTemplatePath', '../src/templates/');
+
+angular.module('adf.material', ['adf.core', 'ngMaterial', 'adf.dialog.ngMaterial'])
+  .value('adfTemplatePath', '../src/templates/material/');
 /*
  * The MIT License
  *
@@ -85,7 +90,7 @@ angular.module('adf.locale', [])
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfDashboardColumn', ["$log", "$compile", "$rootScope", "adfTemplatePath", "rowTemplate", "dashboard", function ($log, $compile, $rootScope, adfTemplatePath, rowTemplate, dashboard) {
     
 
@@ -301,8 +306,8 @@ angular.module('adf')
  * @param {boolean=} categories enable categories for the add widget dialog.
  */
 
-angular.module('adf')
-  .directive('adfDashboard', ["$rootScope", "$log", "$timeout", "$uibModal", "dashboard", "adfTemplatePath", function ($rootScope, $log, $timeout, $uibModal, dashboard, adfTemplatePath) {
+angular.module('adf.core')
+  .directive('adfDashboard', ["$rootScope", "$log", "$timeout", "dialogService", "dashboard", "adfTemplatePath", function ($rootScope, $log, $timeout, dialogService, dashboard, adfTemplatePath) {
     
 
     function stringToBoolean(string){
@@ -380,6 +385,12 @@ angular.module('adf')
     }
 
     function changeStructure(model, structure){
+      if(!model) {
+        model = $scope.model.structure;
+      }
+      if(!structure) {
+        structure = $scope.structures[model];
+      }
       var columns = readColumns(model);
       var counter = 0;
 
@@ -507,17 +518,17 @@ angular.module('adf')
      */
     function createCategories(widgets){
       var categories = {};
-      angular.forEach(widgets, function(widget){
+      angular.forEach(widgets, function(widget, key){
         var category = widget.category;
         // if the widget has no category use a default one
         if (!category){
           category = 'Miscellaneous';
         }
         // push widget to category array
-        if (!categories[category]){
-          categories[category] = [];
+        if (angular.isUndefined(categories[category])){
+          categories[category] = {widgets: {}};
         }
-        categories[category].push(widget);
+        categories[category].widgets[key] = widget;
       });
       return categories;
     }
@@ -643,11 +654,14 @@ angular.module('adf')
           if(model.editTemplateUrl) {
             adfEditTemplatePath = model.editTemplateUrl;
           }
-          var instance = $uibModal.open({
+
+          dialogService.open({
+            controller: function($scope) {},
             scope: editDashboardScope,
             templateUrl: adfEditTemplatePath,
             backdrop: 'static',
-            size: 'lg'
+            size: 'lg',
+            parent: angular.element(document.body)
           });
           editDashboardScope.changeStructure = function(name, structure){
             $log.info('change structure to ' + name);
@@ -657,11 +671,12 @@ angular.module('adf')
             }
           };
           editDashboardScope.closeDialog = function(){
-            // copy the new title back to the model
-            model.title = editDashboardScope.copy.title;
-            // close modal and destroy the scope
-            instance.close();
-            editDashboardScope.$destroy();
+            dialogService.close(function() {
+              // copy the new title back to the model
+              model.title = editDashboardScope.copy.title;
+              // close modal and destroy the scope
+              editDashboardScope.$destroy();
+            });
           };
         };
 
@@ -701,7 +716,7 @@ angular.module('adf')
             backdrop: 'static'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
           addScope.addWidget = function(widget){
             var w = {
               type: widget,
@@ -709,7 +724,7 @@ angular.module('adf')
             };
             addNewWidgetToModel(model, w, name);
             // close and destroy
-            instance.close();
+            dialogService.close();
             addScope.$destroy();
 
             // check for open edit mode immediately
@@ -719,8 +734,9 @@ angular.module('adf')
           };
           addScope.closeDialog = function(){
             // close and destroy
-            instance.close();
-            addScope.$destroy();
+            dialogService.close(function() {
+              addScope.$destroy();
+            });
           };
         };
 
@@ -745,6 +761,33 @@ angular.module('adf')
     };
   }]);
 
+angular.module('adf.dialog.bootstrap', ['ui.bootstrap'])
+  .factory('dialogService', ["$uibModal", function($uibModal) {
+    
+    var dialog = {};
+    var instance;
+    dialog.open = function(options) {
+      instance = $uibModal.open(options);
+    };
+    dialog.close = function(fn) {
+      fn();
+      instance.close();
+    }
+    return dialog;
+}]);
+angular.module('adf.dialog.ngMaterial', ['ngMaterial'])
+  .factory('dialogService', ["$mdDialog", function($mdDialog) {
+    
+    var dialog = {};
+    dialog.open = function(options) {
+      $mdDialog.show(options);
+    };
+    dialog.close = function(fn) {
+      fn();
+      $mdDialog.hide();
+    }
+    return dialog;
+}]);
 /*
 * The MIT License
 *
@@ -857,7 +900,7 @@ angular.module('adf.locale')
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .filter('adfOrderByObjectKey', ["$filter", function($filter) {
     
 
@@ -1256,7 +1299,7 @@ angular.module('adf.provider', ['adf.locale'])
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfDashboardRow', ["$compile", "adfTemplatePath", "columnTemplate", function ($compile, adfTemplatePath, columnTemplate) {
     
 
@@ -1308,7 +1351,7 @@ angular.module('adf')
 
 
 /* global angular */
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfStructurePreview', ["adfTemplatePath", function(adfTemplatePath) {
 
     function adjustRowHeight(container){
@@ -1373,7 +1416,7 @@ angular.module('adf')
 
 
 
-angular.module('adf')
+angular.module('adf.core')
   .directive('adfWidgetContent', ["$log", "$q", "widgetService", "$compile", "$controller", "$injector", "dashboard", function($log, $q, widgetService,
           $compile, $controller, $injector, dashboard) {
 
@@ -1519,7 +1562,7 @@ angular.module('adf')
 /**
  * The widget service provide helper functions to render widgets and their content.
  */
-angular.module('adf')
+angular.module('adf.core')
   .factory('widgetService', ["$http", "$q", "$sce", "$templateCache", "dashboard", function($http, $q, $sce, $templateCache, dashboard) {
     
 
@@ -1593,8 +1636,8 @@ angular.module('adf')
 
 
 
-angular.module('adf')
-  .directive('adfWidget', ["$injector", "$q", "$log", "$uibModal", "$rootScope", "dashboard", "adfTemplatePath", function($injector, $q, $log, $uibModal, $rootScope, dashboard, adfTemplatePath) {
+angular.module('adf.core')
+  .directive('adfWidget', ["$injector", "$q", "$log", "dialogService", "$rootScope", "dashboard", "adfTemplatePath", function($injector, $q, $log, dialogService, $rootScope, dashboard, adfTemplatePath) {
 
     function preLink($scope) {
       var definition = $scope.definition;
@@ -1696,13 +1739,12 @@ angular.module('adf')
             var opts = {
               scope: deleteScope,
               templateUrl: deleteTemplateUrl,
-              backdrop: 'static'
             };
-            var instance = $uibModal.open(opts);
-
+            dialogService.open(opts);
             deleteScope.closeDialog = function() {
-              instance.close();
-              deleteScope.$destroy();
+              dialogService.close(function() {
+                deleteScope.$destroy();
+              });
             };
             deleteScope.deleteDialog = function() {
               deleteWidget();
@@ -1735,11 +1777,12 @@ angular.module('adf')
             backdrop: 'static'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
 
           editScope.closeDialog = function() {
-            instance.close();
-            editScope.$destroy();
+            dialogService.close(function() {
+              editScope.$destroy();
+            });
           };
 
           // TODO create util method
@@ -1855,10 +1898,11 @@ angular.module('adf')
             windowClass: (definition.fullScreen) ? 'dashboard-modal widget-fullscreen' : 'dashboard-modal'
           };
 
-          var instance = $uibModal.open(opts);
+          dialogService.open(opts);
           fullScreenScope.closeDialog = function() {
-            instance.close();
-            fullScreenScope.$destroy();
+            dialogService.close(function() {
+              fullScreenScope.$destroy();
+            });
           };
         };
       }],
