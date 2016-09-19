@@ -34,7 +34,7 @@ var name = pkg.name;
 
 var templateOptions = {
   root: '../src/templates',
-  module: 'adf'
+  module: 'adf.core'
 };
 
 var annotateOptions = {
@@ -164,7 +164,7 @@ gulp.task('sample-templates', function(){
 gulp.task('dashboard-templates', function(){
   var opts = {
     root: '../src/templates',
-    module: 'adf'
+    module: 'adf.core'
   };
   return gulp.src('src/templates/*.html')
              .pipe($.minifyHtml(minifyHtmlOptions))
