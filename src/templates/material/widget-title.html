@@ -1,5 +1,5 @@
 <h3 layout="row" flex>
-  <span flex>{{definition.title}}</span>
+  <span flex ng-show="definition.title">{{definition.title}}</span>
   <span flex></span>
   <span>
     <a href="" title="{{ translate('ADF_WIDGET_TOOLTIP_REFRESH') }}" ng-if="widget.reload" ng-click="reload()">

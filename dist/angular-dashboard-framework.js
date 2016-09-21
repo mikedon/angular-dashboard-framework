@@ -1646,10 +1646,6 @@ angular.module('adf.core')
         var w = dashboard.widgets[definition.type];
         if (w) {
           // pass title
-          if (!definition.title) {
-            definition.title = w.title;
-          }
-
           if (!definition.titleTemplateUrl) {
             definition.titleTemplateUrl = adfTemplatePath + 'widget-title.html';
             if (w.titleTemplateUrl) {
