@@ -319,9 +319,6 @@ angular.module('adf.core')
             }
 
             if (model) {
-              if (!model.title){
-                model.title = 'Dashboard';
-              }
               if (!model.titleTemplateUrl) {
                 model.titleTemplateUrl = adfTemplatePath + 'dashboard-title.html';
               }
