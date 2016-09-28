@@ -122,7 +122,7 @@ angular.module('adf.core')
             }
             var opts = {
               scope: deleteScope,
-              templateUrl: deleteTemplateUrl,
+              templateUrl: deleteTemplateUrl
             };
             dialogService.open(opts);
             deleteScope.closeDialog = function() {
