@@ -542,7 +542,8 @@ angular.module('adf.core')
         adfModel: '=',
         adfWidgetFilter: '=',
         categories: '@',
-        titleTemplateUrl: '@'
+        titleTemplateUrl: '@',
+        editTemplateUrl: '@'
       },
       controller: ["$scope", function($scope){
         var model = {};
@@ -645,7 +646,9 @@ angular.module('adf.core')
           editDashboardScope.split = split;
 
           var adfEditTemplatePath = adfTemplatePath + 'dashboard-edit.html';
-          if(model.editTemplateUrl) {
+          if ($scope.options.editTemplateUrl) {
+            adfEditTemplatePath = $scope.options.editTemplateUrl;
+          } else if (model.editTemplateUrl) {
             adfEditTemplatePath = model.editTemplateUrl;
           }
 
@@ -750,7 +753,8 @@ angular.module('adf.core')
           maximizable: stringToBoolean($attr.maximizable),
           collapsible: stringToBoolean($attr.collapsible),
           categories: stringToBoolean($attr.categories),
-          titleTemplateUrl: $attr.titleTemplateUrl
+          titleTemplateUrl: $attr.titleTemplateUrl,
+          editTemplateUrl: $attr.editTemplateUrl
         };
         if (angular.isDefined($attr.editable)){
           options.editable = stringToBoolean($attr.editable);
