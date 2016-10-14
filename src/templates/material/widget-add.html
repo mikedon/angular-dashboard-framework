@@ -1,7 +1,7 @@
 <md-dialog aria-label="widget-add">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Add new widget</h2>
+      <h2>Add New Widget</h2>
       <span flex></span>
       <md-button ng-click="closeDialog()">X</md-button>
     </div>
@@ -24,14 +24,15 @@
       </div>
       <div ng-if="!createCategories">
         <md-list flex>
-          <md-list-item ng-repeat="widget in widgets | adfOrderByObjectKey: 'key'">
+          <md-list-item class="md-3-line" ng-repeat="widget in widgets | adfOrderByObjectKey: 'key'">
             <div class="md-list-item-text">
               <h3>{{widget.title}}</h3>
               <p>{{widget.description}}</p>
             </div>
-            <md-button ng-click="addWidget(widget.key)">
-              <i class="material-icons">node_add</i>
+            <md-button class="md-secondary" aria-label="Add Widget" ng-click="addWidget(widget.key)">
+              <md-icon style="font-size: 24px;">note_add</md-icon>
             </md-button>
+            <md-divider ng-if="!$last"></md-divider>
           </md-list-item>
         </md-list>
       </div>

@@ -26,6 +26,8 @@
 }
 
 .widget h3 a {
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -67,7 +69,16 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
+.edit-icons-container {
+  font-size: 18px;
+}
+
 .adf-move {
+  cursor: move;
+  cursor: -webkit-grabbing;
+}
+
+.adf-move i {
   cursor: move;
   cursor: -webkit-grabbing;
 }
