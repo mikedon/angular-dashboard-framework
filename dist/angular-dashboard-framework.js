@@ -541,7 +541,8 @@ angular.module('adf.core')
         maximizable: '@',
         adfModel: '=',
         adfWidgetFilter: '=',
-        categories: '@'
+        categories: '@',
+        titleTemplateUrl: '@'
       },
       controller: ["$scope", function($scope){
         var model = {};
@@ -572,7 +573,9 @@ angular.module('adf.core')
             }
 
             if (model) {
-              if (!model.titleTemplateUrl) {
+              if ($scope.options.titleTemplateUrl) {
+                model.titleTemplateUrl = $scope.options.titleTemplateUrl;
+              } else if (!model.titleTemplateUrl) {
                 model.titleTemplateUrl = adfTemplatePath + 'dashboard-title.html';
               }
               $scope.model = model;
@@ -746,7 +749,8 @@ angular.module('adf.core')
           enableConfirmDelete: stringToBoolean($attr.enableConfirmDelete),
           maximizable: stringToBoolean($attr.maximizable),
           collapsible: stringToBoolean($attr.collapsible),
-          categories: stringToBoolean($attr.categories)
+          categories: stringToBoolean($attr.categories),
+          titleTemplateUrl: $attr.titleTemplateUrl
         };
         if (angular.isDefined($attr.editable)){
           options.editable = stringToBoolean($attr.editable);
