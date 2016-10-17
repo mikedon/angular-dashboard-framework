@@ -4,7 +4,7 @@
       <div class="md-toolbar-tools">
         <h2>Edit Dashboard</h2>
         <span flex></span>
-        <md-button ng-click="closeDialog()">X</md-button>
+        <md-button ng-click="cancelDialog()">X</md-button>
       </div>
     </md-toolbar>
     <md-dialog-content>
@@ -31,7 +31,7 @@
         </md-list>
     </md-dialog-content>
     <md-dialog-actions layout="row">
-      <md-button type="button" class="primary" ng-click="closeDialog()" ng-bind="translate('ADF_COMMON_CLOSE')">Close</md-button>
+      <md-button type="button" class="primary" ng-click="applyDialog()" ng-bind="translate('ADF_COMMON_CLOSE')">Apply</md-button>
     </md-dialog-actions>
   </form>
 </md-dialog>

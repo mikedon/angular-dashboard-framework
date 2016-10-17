@@ -374,11 +374,9 @@ angular.module('adf.core')
         // edit dashboard settings
         $scope.editDashboardDialog = function(){
           var editDashboardScope = getNewModalScope();
-          // create a copy of the title, to avoid changing the title to
-          // "dashboard" if the field is empty
-          editDashboardScope.copy = {
-            title: model.title
-          };
+          // create a copy of our model to avoid changing the settings
+          // if we cancel without saving.
+          editDashboardScope.copy = angular.copy(model);
 
           // pass dashboard structure to scope
           editDashboardScope.structures = dashboard.structures;
@@ -413,11 +411,17 @@ angular.module('adf.core')
               model.structure = name;
             }
           };
-          editDashboardScope.closeDialog = function(){
+          editDashboardScope.applyDialog = function(){
             dialogService.close(function() {
-              // copy the new title back to the model
-              model.title = editDashboardScope.copy.title;
+              // copy the new settings back to the model
+              angular.copy(editDashboardScope.copy, model);
               // close modal and destroy the scope
+              editDashboardScope.$destroy();
+            });
+          };
+          editDashboardScope.cancelDialog = function(){
+            dialogService.close(function() {
+              // close modal and destroy the scope without saving our changes
               editDashboardScope.$destroy();
             });
           };
