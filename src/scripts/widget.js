@@ -58,7 +58,7 @@ angular.module('adf.core')
             }
           }
 
-          if (!definition.titleTemplateUrl) {
+          if (!definition.titleTemplateUrl && !definition.footerTemplateUrl) {
             definition.frameless = w.frameless;
           }
 
