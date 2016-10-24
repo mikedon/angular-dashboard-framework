@@ -7,4 +7,9 @@
   <md-card-content>
       <adf-widget-content model="definition" content="widget" />
   </md-card-content>
+  <md-card-title>
+    <md-card-title-text ng-if="!widget.frameless || editMode">
+      <div ng-include src="definition.footerTemplateUrl"></div>
+    </md-card-title-text>
+  </md-card-title>
 </md-card>
