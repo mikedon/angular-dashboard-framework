@@ -1450,9 +1450,6 @@ angular.module('adf.core')
     }
 
     function renderWidget($scope, $element, currentScope, model, content) {
-      // display loading template
-      $element.html(dashboard.loadingTemplate);
-
       // create new scope
       var templateScope = $scope.$new();
 
