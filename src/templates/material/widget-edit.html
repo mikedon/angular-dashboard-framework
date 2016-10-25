@@ -1,8 +1,8 @@
-<md-dialog aria-label="widget-edit">
+<md-dialog aria-label="widget-edit" flex="nogrow" class="widget-edit-dialog">
   <form name="widgetEditForm" novalidate role="form" ng-submit="saveDialog()">
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>{{widget.title}}</h2>
+        <h2>Edit {{widget.title}} Widget</h2>
         <span flex></span>
         <md-button ng-click="closeDialog()">X</md-button>
       </div>

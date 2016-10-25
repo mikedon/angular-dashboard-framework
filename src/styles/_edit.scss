@@ -22,10 +22,18 @@
  THE SOFTWARE.
 */
 
+.edit-icons-container {
+  font-size: 18px;
+}
 
 .adf-move {
   cursor: move;
   cursor: -webkit-grabbing;
+
+  i {
+    cursor: move;
+    cursor: -webkit-grabbing;
+  }
 }
 
 .edit .column {
@@ -35,6 +43,10 @@
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
+}
+
+.widget-edit-dialog {
+  width:50%;
 }
 
 pre.edit {
