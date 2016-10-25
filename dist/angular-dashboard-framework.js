@@ -706,6 +706,9 @@ angular.module('adf.core')
           //pass translate function to the new scope so we can translate the labels inside the modal dialog
           addScope.translate = $scope.translate;
 
+          // Key-value store to keep track of # of each widget we want to add
+          addScope.selectedWidgets = {};
+
           // pass createCategories function to scope, if categories option is enabled
           if ($scope.options.categories){
             $scope.createCategories = createCategories;
@@ -724,19 +727,35 @@ angular.module('adf.core')
 
           dialogService.open(opts);
           addScope.addWidget = function(widget){
-            var w = {
-              type: widget,
-              config: createConfiguration(widget)
-            };
-            addNewWidgetToModel(model, w, name);
-            // close and destroy
-            dialogService.close();
-            addScope.$destroy();
 
-            // check for open edit mode immediately
-            if (isEditModeImmediate(widget)){
-              openEditMode($scope, w);
+            if (addScope.selectedWidgets[widget]) {
+              addScope.selectedWidgets[widget]++;
+            } else {
+              addScope.selectedWidgets[widget] = 1;
             }
+          };
+          addScope.removeWidget = function(widget) {
+            if (addScope.selectedWidgets[widget]) {
+              addScope.selectedWidgets[widget]--;
+            } else {
+              addScope.selectedWidgets[widget] = 0;
+            }
+          };
+          addScope.applyDialog = function(){
+            angular.forEach(addScope.selectedWidgets, function(widgetCount, widget) {
+              for (var i = 0; i < widgetCount; i++) {
+                var w = {
+                  type: widget,
+                  config: createConfiguration(widget)
+                }; 
+                addNewWidgetToModel(model, w, name);
+              }
+            });
+
+            // close and destroy
+            dialogService.close(function() {
+              addScope.$destroy();
+            });
           };
           addScope.closeDialog = function(){
             // close and destroy
