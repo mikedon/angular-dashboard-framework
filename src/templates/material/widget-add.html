@@ -1,7 +1,7 @@
 <md-dialog aria-label="widget-add">
   <md-toolbar>
     <div class="md-toolbar-tools">
-      <h2>Add New Widget</h2>
+      <h2>Add New Widgets</h2>
       <span flex></span>
       <md-button ng-click="closeDialog()">X</md-button>
     </div>
@@ -30,7 +30,11 @@
               <p>{{widget.description}}</p>
             </div>
             <md-button class="md-secondary" aria-label="Add Widget" ng-click="addWidget(widget.key)">
-              <md-icon style="font-size: 24px;">note_add</md-icon>
+              <md-icon style="font-size: 24px;">add_circle_outline</md-icon>
+            </md-button>
+            <div class="md-secondary"><h2>{{ selectedWidgets[widget.key] || '0' }}</h2></div>
+            <md-button class="md-secondary" aria-label="Remove Widget" ng-click="removeWidget(widget.key)">
+              <md-icon style="font-size: 24px;">remove_circle_outline</md-icon>
             </md-button>
             <md-divider ng-if="!$last"></md-divider>
           </md-list-item>
@@ -40,5 +44,6 @@
   </md-dialog-content>
   <md-dialog-actions layout="row">
     <md-button type="button" class="primary" ng-click="closeDialog()" ng-bind="translate('ADF_COMMON_CLOSE')">Close</md-button>
+    <md-button type="button" class="accent" ng-click="applyDialog()" ng-bind="translate('ADF_COMMON_APPLY')">Apply</md-button>
   </md-dialog-actions>
 </md-dialog>
