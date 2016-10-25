@@ -20,9 +20,9 @@
             <md-input-container class="md-input-has-value" flex>
               <label ng-bind="translate('ADF_EDIT_DASHBOARD_STRUCTURE_LABEL')">Structure</label>
               <br />
-              <md-radio-group ng-model="model.structure" ng-change="changeStructure()" layout="row" layout-wrap layout-padding>
+              <md-radio-group ng-model="copy.structure" layout="row" layout-wrap layout-padding>
                 <md-radio-button ng-repeat="(key, structure) in structures" ng-value="key" flex-gt-sm="45">
-                  <adf-structure-preview name="key" structure="structure" selected="model.structure == key">
+                  <adf-structure-preview name="key" structure="structure" selected="copy.structure == key">
                   </adf-structure-preview>
                 </md-radio-button>
               </md-radio-group>
