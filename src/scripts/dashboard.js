@@ -48,7 +48,7 @@
  */
 
 angular.module('adf.core')
-  .directive('adfDashboard', function ($rootScope, $log, $timeout, dialogService, dashboard, adfTemplatePath) {
+  .directive('adfDashboard', function ($rootScope, $log, $timeout, $document, dialogService, dashboard, adfTemplatePath) {
     'use strict';
 
     function stringToBoolean(string){
@@ -126,12 +126,6 @@ angular.module('adf.core')
     }
 
     function changeStructure(model, structure){
-      if(!model) {
-        model = $scope.model.structure;
-      }
-      if(!structure) {
-        structure = $scope.structures[model];
-      }
       var columns = readColumns(model);
       var counter = 0;
 
@@ -288,7 +282,9 @@ angular.module('adf.core')
         maximizable: '@',
         adfModel: '=',
         adfWidgetFilter: '=',
-        categories: '@'
+        categories: '@',
+        titleTemplateUrl: '@',
+        editTemplateUrl: '@'
       },
       controller: function($scope){
         var model = {};
@@ -319,7 +315,9 @@ angular.module('adf.core')
             }
 
             if (model) {
-              if (!model.titleTemplateUrl) {
+              if ($scope.options.titleTemplateUrl) {
+                model.titleTemplateUrl = $scope.options.titleTemplateUrl;
+              } else if (!model.titleTemplateUrl) {
                 model.titleTemplateUrl = adfTemplatePath + 'dashboard-title.html';
               }
               $scope.model = model;
@@ -376,11 +374,9 @@ angular.module('adf.core')
         // edit dashboard settings
         $scope.editDashboardDialog = function(){
           var editDashboardScope = getNewModalScope();
-          // create a copy of the title, to avoid changing the title to
-          // "dashboard" if the field is empty
-          editDashboardScope.copy = {
-            title: model.title
-          };
+          // create a copy of our model to avoid changing the settings
+          // if we cancel without saving.
+          editDashboardScope.copy = angular.copy(model);
 
           // pass dashboard structure to scope
           editDashboardScope.structures = dashboard.structures;
@@ -389,30 +385,43 @@ angular.module('adf.core')
           editDashboardScope.split = split;
 
           var adfEditTemplatePath = adfTemplatePath + 'dashboard-edit.html';
-          if(model.editTemplateUrl) {
+          if ($scope.options.editTemplateUrl) {
+            adfEditTemplatePath = $scope.options.editTemplateUrl;
+          } else if (model.editTemplateUrl) {
             adfEditTemplatePath = model.editTemplateUrl;
           }
 
           dialogService.open({
-            controller: function($scope) {},
+            controller: function() {},
             scope: editDashboardScope,
             templateUrl: adfEditTemplatePath,
             backdrop: 'static',
             size: 'lg',
-            parent: angular.element(document.body)
+            parent: angular.element($document.body)
           });
-          editDashboardScope.changeStructure = function(name, structure){
-            $log.info('change structure to ' + name);
-            changeStructure(model, structure);
+          editDashboardScope.changeStructure = function(name, structure) {
+            if (!name) {
+              name = editDashboardScope.model.structure;
+            }
+            if (!structure) {
+              structure = editDashboardScope.structures[name];
+            }
+            changeStructure(editDashboardScope.model, structure);
             if (model.structure !== name){
               model.structure = name;
             }
           };
-          editDashboardScope.closeDialog = function(){
+          editDashboardScope.applyDialog = function(){
             dialogService.close(function() {
-              // copy the new title back to the model
-              model.title = editDashboardScope.copy.title;
+              // copy the new settings back to the model
+              angular.copy(editDashboardScope.copy, model);
               // close modal and destroy the scope
+              editDashboardScope.$destroy();
+            });
+          };
+          editDashboardScope.cancelDialog = function(){
+            dialogService.close(function() {
+              // close modal and destroy the scope without saving our changes
               editDashboardScope.$destroy();
             });
           };
@@ -488,7 +497,9 @@ angular.module('adf.core')
           enableConfirmDelete: stringToBoolean($attr.enableConfirmDelete),
           maximizable: stringToBoolean($attr.maximizable),
           collapsible: stringToBoolean($attr.collapsible),
-          categories: stringToBoolean($attr.categories)
+          categories: stringToBoolean($attr.categories),
+          titleTemplateUrl: $attr.titleTemplateUrl,
+          editTemplateUrl: $attr.editTemplateUrl
         };
         if (angular.isDefined($attr.editable)){
           options.editable = stringToBoolean($attr.editable);
