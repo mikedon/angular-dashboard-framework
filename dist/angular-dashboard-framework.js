@@ -660,7 +660,7 @@ angular.module('adf.core')
           });
           editDashboardScope.changeStructure = function(name, structure) {
             if (!name) {
-              name = editDashboardScope.model.structure;
+              name = editDashboardScope.copy.structure;
             }
             if (!structure) {
               structure = editDashboardScope.structures[name];
@@ -672,6 +672,9 @@ angular.module('adf.core')
           };
           editDashboardScope.applyDialog = function(){
             dialogService.close(function() {
+              if (editDashboardScope.copy.structure != editDashboardScope.model.structure) {
+                editDashboardScope.changeStructure();
+              }
               // copy the new settings back to the model
               angular.copy(editDashboardScope.copy, model);
               // close modal and destroy the scope
