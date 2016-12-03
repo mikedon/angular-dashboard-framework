@@ -7,7 +7,7 @@
   <md-card-content>
       <adf-widget-content model="definition" content="widget" />
   </md-card-content>
-  <md-card-footer ng-if="!widget.frameless || editMode" ng-show="editMode">
+  <md-card-footer ng-if="definition.config.punchout.url || definition.config.punchout.title || editMode">
     <md-card-footer-text>
       <div ng-include src="definition.footerTemplateUrl"></div>
     </md-card-footer-text>
