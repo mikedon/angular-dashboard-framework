@@ -46,6 +46,10 @@
   width: 98%;
 }
 
+.hide-borders md-card {
+  box-shadow: none;
+}
+
 /**
  The MIT License
 
