@@ -48,5 +48,11 @@
   width: 98%;
 }
 
+.hide-borders {
+    md-card {
+        box-shadow: none;
+    }
+}
+
 @import "edit";
 @import "structure-preview";
