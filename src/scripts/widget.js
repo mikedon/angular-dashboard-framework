@@ -58,6 +58,13 @@ angular.module('adf.core')
             }
           }
 
+          if (!definition.loadingTemplateUrl) {
+            if (w.loadingTemplateUrl) {
+              definition.loadingTemplateUrl = w.loadingTemplateUrl;
+            }
+          }
+          definition.something = 'here';
+
           if (!definition.titleTemplateUrl && !definition.footerTemplateUrl) {
             definition.frameless = w.frameless;
           }

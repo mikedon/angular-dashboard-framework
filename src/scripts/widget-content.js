@@ -50,6 +50,18 @@ angular.module('adf.core')
     }
 
     function renderWidget($scope, $element, currentScope, model, content) {
+      // display loading template on initial load
+      if (!currentScope && (model.loadingTemplateUrl || dashboard.loadingTemplate)) {
+        if (model.loadingTemplateUrl) {
+          widgetService.getTemplateFromUrl(model.loadingTemplateUrl)
+            .then(function (loadingTemplate) {
+              $element.html(loadingTemplate);
+            });
+        } else {
+          $element.html(dashboard.loadingTemplate);
+        }
+      }
+      
       // create new scope
       var templateScope = $scope.$new();
 
