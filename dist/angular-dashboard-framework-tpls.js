@@ -1739,7 +1739,6 @@ angular.module('adf.core')
               definition.loadingTemplateUrl = w.loadingTemplateUrl;
             }
           }
-          definition.something = 'here';
 
           if (!definition.titleTemplateUrl && !definition.footerTemplateUrl) {
             definition.frameless = w.frameless;
