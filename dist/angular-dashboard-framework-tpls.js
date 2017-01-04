@@ -1472,6 +1472,18 @@ angular.module('adf.core')
     }
 
     function renderWidget($scope, $element, currentScope, model, content) {
+      // display loading template on initial load
+      if (!currentScope && (model.loadingTemplateUrl || dashboard.loadingTemplate)) {
+        if (model.loadingTemplateUrl) {
+          widgetService.getTemplateFromUrl(model.loadingTemplateUrl)
+            .then(function (loadingTemplate) {
+              $element.html(loadingTemplate);
+            });
+        } else {
+          $element.html(dashboard.loadingTemplate);
+        }
+      }
+      
       // create new scope
       var templateScope = $scope.$new();
 
@@ -1634,6 +1646,31 @@ angular.module('adf.core')
       return deferred.promise;
     };
 
+    exposed.getTemplateFromUrl = function(templateUrl) {
+      var deferred = $q.defer();
+
+      if (templateUrl) {
+        // try to fetch template from cache
+        var tpl = $templateCache.get(templateUrl);
+        if (tpl) {
+          deferred.resolve(tpl);
+        } else {
+          var url = $sce.getTrustedResourceUrl(parseUrl(templateUrl));
+          $http.get(url)
+               .success(function(response) {
+                 // put response to cache, with unmodified url as key
+                 $templateCache.put(templateUrl, response);
+                 deferred.resolve(response);
+               })
+               .error(function() {
+                 deferred.reject('could not load template');
+               });
+        }
+      }
+
+      return deferred.promise;
+    }
+
     return exposed;
   }]);
 
@@ -1694,6 +1731,12 @@ angular.module('adf.core')
             definition.editTemplateUrl = adfTemplatePath + 'widget-edit.html';
             if (w.editTemplateUrl) {
               definition.editTemplateUrl = w.editTemplateUrl;
+            }
+          }
+
+          if (!definition.loadingTemplateUrl) {
+            if (w.loadingTemplateUrl) {
+              definition.loadingTemplateUrl = w.loadingTemplateUrl;
             }
           }
 
