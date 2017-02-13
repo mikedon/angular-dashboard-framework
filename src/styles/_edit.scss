@@ -22,10 +22,18 @@
  THE SOFTWARE.
 */
 
+.edit-icons-container {
+  font-size: 18px;
+}
 
 .adf-move {
   cursor: move;
   cursor: -webkit-grabbing;
+
+  i {
+    cursor: move;
+    cursor: -webkit-grabbing;
+  }
 }
 
 .edit .column {

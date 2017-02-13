@@ -72,5 +72,30 @@ angular.module('adf.core')
       return deferred.promise;
     };
 
+    exposed.getTemplateFromUrl = function(templateUrl) {
+      var deferred = $q.defer();
+
+      if (templateUrl) {
+        // try to fetch template from cache
+        var tpl = $templateCache.get(templateUrl);
+        if (tpl) {
+          deferred.resolve(tpl);
+        } else {
+          var url = $sce.getTrustedResourceUrl(parseUrl(templateUrl));
+          $http.get(url)
+               .success(function(response) {
+                 // put response to cache, with unmodified url as key
+                 $templateCache.put(templateUrl, response);
+                 deferred.resolve(response);
+               })
+               .error(function() {
+                 deferred.reject('could not load template');
+               });
+        }
+      }
+
+      return deferred.promise;
+    }
+
     return exposed;
   });

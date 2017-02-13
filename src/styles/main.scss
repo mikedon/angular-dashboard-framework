@@ -28,6 +28,8 @@
 }
 
 .widget h3 a {
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -44,6 +46,12 @@
 */
 .dashboard-modal.widget-fullscreen .modal-dialog {
   width: 98%;
+}
+
+.hide-borders {
+    md-card {
+        box-shadow: none;
+    }
 }
 
 @import "edit";
